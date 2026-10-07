@@ -65,8 +65,6 @@ docker-compose -f docker/docker-compose.yml up --build
 ```
 This spins up the MySQL DB, FastAPI Backend, and Streamlit Frontend seamlessly.
 
-## 📸 Screenshots
-*(Add screenshots of your UI here!)*
 
 ## 📡 API Endpoints (Backend)
 | Endpoint | Method | Description |
