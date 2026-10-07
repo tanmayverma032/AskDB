@@ -4,7 +4,7 @@ import urllib.parse
 
 class Settings(BaseSettings):
     GEMINI_API_KEY: str = Field(default="", description="Google Gemini API Key")
-    GEMINI_MODEL: str = Field(default="gemini-flash-latest", description="Gemini model to use")
+    GEMINI_MODEL: str = Field(default="gemini-3.8-flash", description="Gemini model to use")
     
     DB_TYPE: str = Field(default="mysql", description="Database type (mysql or postgresql)")
     DB_HOST: str = Field(default="localhost", description="Database host")
