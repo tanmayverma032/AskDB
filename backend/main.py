@@ -13,6 +13,20 @@ async def lifespan(app: FastAPI):
     """
     # Startup: Initialize resources if needed
     print("Starting AskDB API...")
+    try:
+        from backend.config import settings
+        if settings.DB_NAME and settings.DB_USER:
+            print(f"Connecting to default database: {settings.DB_NAME}...")
+            db_service.connect(
+                db_type=settings.DB_TYPE,
+                host=settings.DB_HOST,
+                port=settings.DB_PORT,
+                user=settings.DB_USER,
+                password=settings.DB_PASSWORD,
+                database=settings.DB_NAME
+            )
+    except Exception as e:
+        print(f"Database auto-connect skipped/failed: {e}")
     yield
     # Shutdown: Clean up resources
     print("Shutting down AskDB API...")

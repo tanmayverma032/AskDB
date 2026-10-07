@@ -1,6 +1,7 @@
 import sqlparse
 import re
-from typing import Dict, List, Tuple
+from backend.services.database import db_service
+from typing import Dict, List, Tuple, Optional
 from backend.models.responses import ValidationResult
 import logging
 
@@ -66,7 +67,7 @@ class QueryValidator:
                 
         return columns
 
-    def validate(self, sql: str, schema: Dict[str, List[str]]) -> ValidationResult:
+    def validate(self, sql: str, schema: Optional[Dict[str, List[str]]] = None) -> ValidationResult:
         """
         Validates the SQL query:
         1. Checks for dangerous keywords
@@ -75,6 +76,9 @@ class QueryValidator:
         4. Validates table names
         5. Validates column names (best-effort)
         """
+        if schema is None:
+            schema = db_service.get_all_columns() if db_service.is_connected else {}
+
         errors = []
         warnings = []
         

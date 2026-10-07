@@ -27,6 +27,18 @@ class ConversationMemory:
             # Try to keep pairs (user + assistant) intact
             session["messages"] = session["messages"][-self.max_history:]
 
+    def add_interaction(self, session_id: str, question: str, response: Any):
+        """Helper to record a full interaction turn (question + assistant response)."""
+        self.add_message(session_id, "user", question)
+        content = ""
+        if isinstance(response, dict):
+            content = response.get("generated_sql") or response.get("sql_query") or "Result retrieved."
+        elif hasattr(response, "generated_sql"):
+            content = getattr(response, "generated_sql", "") or "Result retrieved."
+        else:
+            content = str(response)
+        self.add_message(session_id, "assistant", content)
+
     def get_history(self, session_id: str) -> List[Dict[str, str]]:
         """Returns the message history for a session."""
         if session_id in self.sessions:

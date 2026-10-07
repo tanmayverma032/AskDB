@@ -9,11 +9,22 @@ logger = logging.getLogger(__name__)
 
 class GeminiService:
     def __init__(self, api_key: str, model_name: str):
-        self.client = genai.Client(api_key=api_key)
+        self.api_key = api_key
         self.model_name = model_name
+        self.client = genai.Client(api_key=api_key) if api_key else None
+
+    def _ensure_client(self):
+        if not self.client:
+            key = self.api_key or settings.GEMINI_API_KEY
+            if key:
+                self.api_key = key
+                self.client = genai.Client(api_key=key)
+            else:
+                raise ValueError("GEMINI_API_KEY is not configured. Please set your GEMINI_API_KEY in the .env file.")
 
     def generate_sql(self, question: str, schema_context: str, chat_history: Optional[List[Dict[str, str]]] = None) -> str:
         """Generates SQL from a natural language question using the provided schema context."""
+        self._ensure_client()
         
         system_instruction = f"""
 You are an expert SQL generator. Your task is to translate natural language questions into executable SQL queries.
@@ -62,6 +73,7 @@ Schema Context:
 
     def generate_insights(self, question: str, sql: str, columns: List[str], rows: List[Dict[str, Any]]) -> List[str]:
         """Takes query results and generates 3-5 business insights."""
+        self._ensure_client()
         
         # Limit rows for prompt context to avoid token limits
         sample_data = rows[:50] 
@@ -93,7 +105,7 @@ Generate 3-5 insights based on this data.
             
             insights = json.loads(response.text)
             if isinstance(insights, list):
-                return insights
+                return [str(i) for i in insights]
             return ["Could not generate properly formatted insights."]
         except Exception as e:
             logger.error(f"Error generating insights: {str(e)}")
@@ -101,6 +113,7 @@ Generate 3-5 insights based on this data.
 
     def explain_sql(self, sql: str, schema_context: str) -> Dict[str, Any]:
         """Explains SQL in plain English and identifies tables and operations used."""
+        self._ensure_client()
         
         system_instruction = """
 You are an expert SQL teacher. Explain the following SQL query in simple, plain English so that a non-technical user can understand it.
@@ -129,9 +142,9 @@ Provide the explanation in JSON format.
             
             result = json.loads(response.text)
             return {
-                "explanation": result.get("explanation", "No explanation provided."),
-                "tables_used": result.get("tables_used", []),
-                "operations": result.get("operations", [])
+                "explanation": str(result.get("explanation", "No explanation provided.")),
+                "tables_used": [str(t) for t in result.get("tables_used", [])],
+                "operations": [str(op) for op in result.get("operations", [])]
             }
         except Exception as e:
             logger.error(f"Error explaining SQL: {str(e)}")
@@ -141,8 +154,9 @@ Provide the explanation in JSON format.
                 "operations": []
             }
 
-    def suggest_chart_type(self, columns: List[str], rows: List[Dict[str, Any]], question: str) -> Optional[str]:
+    def suggest_chart_type(self, columns: List[str], rows: List[Dict[str, Any]], question: str = "") -> Optional[str]:
         """Analyzes data to suggest the best chart type."""
+        self._ensure_client()
         
         sample_data = rows[:5]
         

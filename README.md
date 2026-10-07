@@ -31,7 +31,7 @@ AskDB is a powerful, intelligent AI Database Assistant that allows you to chat w
 ## 🚀 Quick Start
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/AskDB.git
+   git clone https://github.com/tanmayverma032/AskDB.git
    cd AskDB
    ```
 2. **Install dependencies**:

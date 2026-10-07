@@ -39,14 +39,15 @@ async def explain_query(request: ExplainRequest):
     Explain what a SQL query does in plain English.
     """
     try:
-        schema_info = None
-        if db_service.is_connected():
-            schema_info = db_service.get_schema()
+        schema_context = ""
+        if db_service.is_connected:
+            schema_context = db_service.schema_context or db_service.build_schema_context()
             
-        explanation = await gemini_service.explain_sql(request.sql, schema_info)
+        explain_data = gemini_service.explain_sql(request.sql, schema_context)
         return ExplainResponse(
-            sql=request.sql,
-            explanation=explanation
+            explanation=explain_data.get("explanation", ""),
+            tables_used=explain_data.get("tables_used", []),
+            operations=explain_data.get("operations", [])
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to explain query: {str(e)}")

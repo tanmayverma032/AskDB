@@ -1,9 +1,10 @@
+import os
 import httpx
 from typing import Dict, Any, List, Optional
 
 class AskDBClient:
-    def __init__(self, base_url: str = "http://localhost:8000"):
-        self.base_url = base_url
+    def __init__(self, base_url: Optional[str] = None):
+        self.base_url = (base_url or os.getenv("API_URL", "http://localhost:8000")).rstrip("/")
         self.client = httpx.Client(timeout=30.0)
         
     def _handle_error(self, e: Exception) -> Dict[str, Any]:

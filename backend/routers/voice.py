@@ -17,7 +17,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
         if not audio_bytes:
             raise HTTPException(status_code=400, detail="Empty audio file")
             
-        text = await voice_service.transcribe(audio_bytes)
+        text = voice_service.transcribe(audio_bytes)
         return {"text": text}
     except HTTPException:
         raise
@@ -35,7 +35,7 @@ async def synthesize_speech(payload: dict = Body(...)):
         if not text:
             raise HTTPException(status_code=400, detail="Text is required for synthesis")
             
-        audio_bytes = await voice_service.synthesize(text)
+        audio_bytes = voice_service.synthesize(text)
         
         # Return as streaming response
         return StreamingResponse(

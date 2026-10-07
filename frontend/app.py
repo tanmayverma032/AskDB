@@ -10,6 +10,7 @@ st.set_page_config(
 )
 
 from utils.styles import get_custom_css, get_sql_highlight_css
+from utils.api_client import api_client
 from components.sidebar import render_sidebar
 from components.chat import render_chat, handle_user_input
 from components.voice import render_voice_input
@@ -29,6 +30,19 @@ def init_session_state():
         st.session_state.query_history = []
     if "voice_prompt" not in st.session_state:
         st.session_state.voice_prompt = None
+
+    # Check if backend is already connected (e.g. from environment settings)
+    if not st.session_state.connected and not st.session_state.get("_initial_checked"):
+        st.session_state._initial_checked = True
+        try:
+            status = api_client.get_status()
+            if status.get("connected"):
+                st.session_state.connected = True
+                schema_res = api_client.get_schema()
+                if "tables" in schema_res:
+                    st.session_state.schema = schema_res
+        except Exception:
+            pass
 
 def main():
     # Inject CSS

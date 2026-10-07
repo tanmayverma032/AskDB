@@ -59,15 +59,20 @@ class VisualizationService:
             
         return None
 
-    def generate_chart(self, columns: List[str], rows: List[Dict[str, Any]], chart_type: str, question: str = "") -> Optional[Dict[str, Any]]:
+    def suggest_chart_type(self, columns: List[str], rows: List[Dict[str, Any]]) -> Optional[str]:
+        """Alias for detect_chart_type."""
+        return self.detect_chart_type(columns, rows)
+
+    def generate_chart(self, columns: List[str], rows: Optional[List[Dict[str, Any]]] = None, chart_type: str = "bar", question: str = "", data: Optional[List[Dict[str, Any]]] = None) -> Optional[Dict[str, Any]]:
         """
         Generates a Plotly chart and returns the JSON configuration.
         """
-        if not rows or not columns:
+        row_list = rows if rows is not None else (data or [])
+        if not row_list or not columns:
             return None
             
         try:
-            df = self._prepare_dataframe(columns, rows)
+            df = self._prepare_dataframe(columns, row_list)
             
             numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
             categorical_cols = df.select_dtypes(exclude=['number']).columns.tolist()

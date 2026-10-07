@@ -1,6 +1,15 @@
 # Environment Variables
 .env
 .env.local
+.env.*.local
+
+# Unrelated project files / sensitive sheets
+sheet/
+*.xlsx
+*.xls
+
+# Streamlit secrets
+.streamlit/secrets.toml
 
 # Python
 __pycache__/
@@ -19,9 +28,16 @@ ENV/
 *.sqlite3
 *.db
 
+# Logs and Caches
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+
 # OS Files
 .DS_Store
 Thumbs.db
+ehthumbs.db
 
 # Node
 node_modules/
