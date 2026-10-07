@@ -37,7 +37,25 @@ class DatabaseService:
             driver = "pymysql" if db_type.lower() == "mysql" else "psycopg2"
             db_url = f"{db_type.lower()}+{driver}://{user}:{encoded_password}@{host}:{port}/{database}"
             
-            self.engine = create_engine(db_url, pool_pre_ping=True)
+            connect_args = {}
+            if host.lower() not in ["localhost", "127.0.0.1", "mysql"]:
+                # Cloud databases (TiDB Cloud, Aiven, AWS RDS) require SSL/TLS
+                import os
+                ssl_dict = {}
+                if os.path.exists("/etc/ssl/certs/ca-certificates.crt"):
+                    ssl_dict["ca"] = "/etc/ssl/certs/ca-certificates.crt"
+                else:
+                    try:
+                        import certifi
+                        ssl_dict["ca"] = certifi.where()
+                    except Exception:
+                        pass
+                if ssl_dict:
+                    connect_args["ssl"] = ssl_dict
+                else:
+                    connect_args["ssl"] = {"check_hostname": False}
+
+            self.engine = create_engine(db_url, connect_args=connect_args, pool_pre_ping=True)
             
             # Test connection
             with self.engine.connect() as conn:
